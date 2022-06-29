@@ -203,10 +203,10 @@ static void VS_CC checkmateCreate(const VSMap* in, VSMap* out, void* userData, V
 VS_EXTERNAL_API(void) VapourSynthPluginInit2(VSPlugin* plugin, const VSPLUGINAPI* vspapi) {
 	vspapi->configPlugin("com.julek.checkmate", "checkmate", "Spatial and temporal dot crawl reducer", VS_MAKE_VERSION(1, 0), VAPOURSYNTH_API_VERSION, 0, plugin);
 	vspapi->registerFunction("Checkmate",
-							 "clip:vnode;"
-							 "thr:int:opt;"
-							 "tmax:int:opt;"
-							 "tthr2:int:opt;",
-							 "clip:vnode;",
-		                     checkmateCreate, NULL, plugin);
+                             "clip:vnode;"
+                             "thr:int:opt;"
+                             "tmax:int:opt;"
+                             "tthr2:int:opt;",
+                             "clip:vnode;",
+                             checkmateCreate, NULL, plugin);
 }
