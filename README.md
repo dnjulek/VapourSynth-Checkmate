@@ -8,6 +8,7 @@ Ported from [AviSynth plugin](https://github.com/tp7/checkmate)
 ```python
 checkmate.Checkmate(vnode clip[, int thr=12, int tmax=12, int tthr2=0])
 ```
+* *clip* - clip to process. Any format, 8 bit only.
 
 * *thr* - spatial threshold. Controls the spatial filter, higher values will blend more but cause artifacts if set too high. If set too low, lines in static scenes where dot crawl was reduced will become slightly more blurry. **12** by default.
 
