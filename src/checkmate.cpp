@@ -31,6 +31,14 @@ static __forceinline int clip(int val, int minimum, int maximum) {
 	return val;
 }
 
+void BitBlt(uint8_t* dstp, int dst_pitch, const uint8_t* srcp, int src_pitch, int row_size, int height) {
+	for (int y = height; y > 0; --y) {
+		memcpy(dstp, srcp, row_size);
+		dstp += dst_pitch;
+		srcp += src_pitch;
+	}
+}
+
 static inline void process_line_c(uint8_t* dstp, const uint8_t* srcp_p2, const uint8_t* srcp_p1, const uint8_t* srcp, const uint8_t* srcp_n1, const uint8_t* srcp_n2,
 	ptrdiff_t src_pitch, ptrdiff_t src_p1_pitch, ptrdiff_t src_n1_pitch, int width, int thr, int tmax, int tthr2) {
 	uint16_t tmax_multiplier = ((1 << 13) / tmax);
@@ -85,7 +93,7 @@ static const VSFrame* VS_CC checkmateGetFrame(int n, int activationReason, void*
 		const VSFrame* src_p1 = vsapi->getFrameFilter(std::max(0, n - 1), d->node, frameCtx);
 		const VSFrame* src = vsapi->getFrameFilter(n, d->node, frameCtx);
 		const VSFrame* src_n1 = vsapi->getFrameFilter(std::min(n + 1, d->vi->numFrames - 1), d->node, frameCtx);
-		
+
 		const VSFrame* src_p2 = nullptr;
 		const VSFrame* src_n2 = nullptr;
 
@@ -122,6 +130,8 @@ static const VSFrame* VS_CC checkmateGetFrame(int n, int activationReason, void*
 			int h = vsapi->getFrameHeight(src, plane);
 			int w = vsapi->getFrameWidth(src, plane);
 
+			BitBlt(dstp, vsapi->getStride(dst, plane), srcp, vsapi->getStride(src, plane), w, 2);
+
 			srcp_p1 += src_p1_pitch * 2;
 			srcp += src_pitch * 2;
 			srcp_n1 += src_n1_pitch * 2;
@@ -135,6 +145,7 @@ static const VSFrame* VS_CC checkmateGetFrame(int n, int activationReason, void*
 				dstp += dst_pitch;
 			}
 
+			BitBlt(dstp, vsapi->getStride(dst, plane), srcp, vsapi->getStride(src, plane), w, 2);
 		}
 
 		vsapi->freeFrame(src_p2);
@@ -182,7 +193,7 @@ static void VS_CC checkmateCreate(const VSMap* in, VSMap* out, void* userData, V
 		d.tthr2 = 0;
 
 	if (d.tmax <= 0 || d.tmax > 255) {
-		vsapi->mapSetError(out, "Checkmate: max value should be in range [1;255]");
+		vsapi->mapSetError(out, "Checkmate: tmax value should be in range [1;255]");
 		vsapi->freeNode(d.node);
 		return;
 	}
@@ -203,10 +214,10 @@ static void VS_CC checkmateCreate(const VSMap* in, VSMap* out, void* userData, V
 VS_EXTERNAL_API(void) VapourSynthPluginInit2(VSPlugin* plugin, const VSPLUGINAPI* vspapi) {
 	vspapi->configPlugin("com.julek.checkmate", "checkmate", "Spatial and temporal dot crawl reducer", VS_MAKE_VERSION(1, 0), VAPOURSYNTH_API_VERSION, 0, plugin);
 	vspapi->registerFunction("Checkmate",
-                             "clip:vnode;"
-                             "thr:int:opt;"
-                             "tmax:int:opt;"
-                             "tthr2:int:opt;",
-                             "clip:vnode;",
-                             checkmateCreate, NULL, plugin);
+							"clip:vnode;"
+							"thr:int:opt;"
+							"tmax:int:opt;"
+							"tthr2:int:opt;",
+							"clip:vnode;",
+							checkmateCreate, NULL, plugin);
 }
