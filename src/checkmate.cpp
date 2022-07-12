@@ -31,14 +31,6 @@ static __forceinline int clip(int val, int minimum, int maximum) {
 	return val;
 }
 
-void BitBlt(uint8_t* dstp, int dst_pitch, const uint8_t* srcp, int src_pitch, int row_size, int height) {
-	for (int y = height; y > 0; --y) {
-		memcpy(dstp, srcp, row_size);
-		dstp += dst_pitch;
-		srcp += src_pitch;
-	}
-}
-
 static inline void process_line_c(uint8_t* dstp, const uint8_t* srcp_p2, const uint8_t* srcp_p1, const uint8_t* srcp, const uint8_t* srcp_n1, const uint8_t* srcp_n2,
 	ptrdiff_t src_pitch, ptrdiff_t src_p1_pitch, ptrdiff_t src_n1_pitch, int width, int thr, int tmax, int tthr2) {
 	uint16_t tmax_multiplier = ((1 << 13) / tmax);
@@ -130,7 +122,7 @@ static const VSFrame* VS_CC checkmateGetFrame(int n, int activationReason, void*
 			int h = vsapi->getFrameHeight(src, plane);
 			int w = vsapi->getFrameWidth(src, plane);
 
-			BitBlt(dstp, vsapi->getStride(dst, plane), srcp, vsapi->getStride(src, plane), w, 2);
+			vsh::bitblt(dstp, vsapi->getStride(dst, plane), srcp, vsapi->getStride(src, plane), static_cast<size_t>(w) * fi->bytesPerSample, 2);
 
 			srcp_p1 += src_p1_pitch * 2;
 			srcp += src_pitch * 2;
@@ -145,7 +137,7 @@ static const VSFrame* VS_CC checkmateGetFrame(int n, int activationReason, void*
 				dstp += dst_pitch;
 			}
 
-			BitBlt(dstp, vsapi->getStride(dst, plane), srcp, vsapi->getStride(src, plane), w, 2);
+			vsh::bitblt(dstp, vsapi->getStride(dst, plane), srcp, vsapi->getStride(src, plane), static_cast<size_t>(w) * fi->bytesPerSample, 2);
 		}
 
 		vsapi->freeFrame(src_p2);
