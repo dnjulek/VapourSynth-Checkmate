@@ -1,3 +1,5 @@
+> [!CAUTION] 
+> DEPRECATED! Use https://github.com/dnjulek/vapoursynth-zip
 ## Checkmate
 
 Spatial and temporal dot crawl reducer. Checkmate is most effective in static or low motion scenes.
